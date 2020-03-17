@@ -20,12 +20,13 @@ export class Engine {
     }
 
     update(canvas: HTMLCanvasElement) {
-        console.log(canvas)
         const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
 
         if (!ctx) {
             throw 'expected canvas ctx to exist by now'
         }
+
+        this.units = updateUnits(this.units)
 
         ctx.fillStyle = "#fff5f5";
         ctx.fillRect(0, 0, Constants.FIELD_WIDTH, Constants.FIELD_HEIGHT);
@@ -42,7 +43,62 @@ export class Engine {
     }
 }
 
+/**
+* Moves each unit and updates their direction vectors based on collisions.
+* @param unit a unit
+* @param units units
+* @returns an instance of a unit
+*/
+export const updateUnits = (units: Models.Node[]) => {
+    const nextUnits = []
 
+    while (units.length > 0) {
+        const unitA = units.pop()
+
+        if (!unitA) {
+            continue
+        }
+
+        let collided = false
+        unitA.move()
+        for (let i = 0; i < units.length; i++){
+            const unitB = units[i]
+            if (!unitB){
+                continue
+            }
+            unitB.move()
+            if (collides(unitA, unitB)) {
+                unitA.vx *= -1
+                unitA.vy *= -1
+                unitB.vx *= -1
+                unitB.vy *= -1
+                nextUnits.push(unitA)
+                nextUnits.push(unitB)
+                collided = true
+                delete units[i]
+                break
+            } else {
+                unitB.undoMove()
+            }
+        }
+
+        if (!collided) {
+            nextUnits.push(unitA)
+        }
+    }
+    
+    return nextUnits
+}
+
+/**
+* Updates the X, Y position of the unit with respect to its movement vector.
+* @param unit a unit
+* @returns an instance of a unit
+*/
+export const moveUnit = (unit: Models.Node) => {
+    unit.x += unit.vx
+    unit.y += unit.vy
+}
 
 /**
 * Creates a new unit with whose (x, y) position does not collide with any other unit from units.
@@ -53,7 +109,6 @@ export class Engine {
 export const createUnit = (units: Models.Node[], unitSize: number): Models.Node => {
     const unit = new Models.Node(0, 0, unitSize)
 
-    console.log('nums')
     let x = genRandomNumber(0, Constants.FIELD_WIDTH - unitSize)
     let y = genRandomNumber(0, Constants.FIELD_HEIGHT - unitSize)
 
@@ -73,19 +128,15 @@ export const createUnit = (units: Models.Node[], unitSize: number): Models.Node 
         }
 
         if (collisionFree) {
-            console.log(unit.x, unit.y)
             return unit
         }
 
         // TODO: Find a cleaner way to shift colliding units.
         x += unitSize
-        console.log(x)
         if (x + unitSize >= Constants.FIELD_WIDTH) {
-            console.log('x lap!')
             x = 0
             y += unitSize
             if (y >= Constants.FIELD_HEIGHT) {
-                console.log('y lap!')
                 if (laps == 1) {
                     throw 'after scanning the entire field, no position available to insert next unit'
                 }
@@ -107,7 +158,7 @@ export const collides = (unitA: Models.Node, unitB: Models.Node) => {
         throw 'collides() expects two units to compare, received one or less'
     }
 
-    const size = unitA.size
+    const size = unitA.size + unitA.size
 
     return Math.abs(unitA.x - unitB.x) <= size && Math.abs(unitA.y - unitB.y) <= size
 }

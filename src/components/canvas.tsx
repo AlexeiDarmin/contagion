@@ -18,7 +18,7 @@ class Canvas extends React.Component {
     }
 
     componentDidMount() {
-        this.engineInterval = setInterval(this.runAnimationFrame, 1000);
+        this.engineInterval = setInterval(this.runAnimationFrame, 1000 / Constants.FPS);
         this.canvasRef.current?.getContext('2d')?.scale(Constants.FIELD_SCALE, Constants.FIELD_SCALE)
     }
 
