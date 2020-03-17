@@ -22,22 +22,27 @@ export class Engine {
     update(canvas: HTMLCanvasElement) {
         console.log(canvas)
         const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
-        
+
         if (!ctx) {
             throw 'expected canvas ctx to exist by now'
         }
-        
+
         ctx.fillStyle = "#fff5f5";
         ctx.fillRect(0, 0, Constants.FIELD_WIDTH, Constants.FIELD_HEIGHT);
 
-        // Set line width
         ctx.lineWidth = 0.5;
-
-        ctx.beginPath();
-        ctx.arc(5, 75, Constants.UNIT_SIZE, 0, 2 * Math.PI);
-        ctx.stroke();
+        for (let i = 0; i < this.units.length; i++) {
+            const { x, y, size } = this.units[i]
+            ctx.fillStyle = "green";
+            ctx.beginPath();
+            ctx.arc((x + size / 2), (y + size / 2), size, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.stroke();
+        }
     }
 }
+
+
 
 /**
 * Creates a new unit with whose (x, y) position does not collide with any other unit from units.
@@ -45,16 +50,15 @@ export class Engine {
 * @param unitSize the size of the unit to be created
 * @returns an instance of a unit
 */
-export function createUnit(units: Models.Node[], unitSize: number): Models.Node {
+export const createUnit = (units: Models.Node[], unitSize: number): Models.Node => {
     const unit = new Models.Node(0, 0, unitSize)
 
-    let count = 0
-    while (count < 100) {
-        count += 1
+    console.log('nums')
+    let x = genRandomNumber(0, Constants.FIELD_WIDTH - unitSize)
+    let y = genRandomNumber(0, Constants.FIELD_HEIGHT - unitSize)
 
-        const x = genRandomNumber(0, Constants.FIELD_WIDTH - unitSize)
-        const y = genRandomNumber(0, Constants.FIELD_HEIGHT - unitSize)
-
+    let laps = 0
+    while (true) {
         unit.x = x
         unit.y = y
 
@@ -69,11 +73,27 @@ export function createUnit(units: Models.Node[], unitSize: number): Models.Node 
         }
 
         if (collisionFree) {
+            console.log(unit.x, unit.y)
             return unit
         }
-    }
 
-    throw 'failed to create a unit'
+        // TODO: Find a cleaner way to shift colliding units.
+        x += unitSize
+        console.log(x)
+        if (x + unitSize >= Constants.FIELD_WIDTH) {
+            console.log('x lap!')
+            x = 0
+            y += unitSize
+            if (y >= Constants.FIELD_HEIGHT) {
+                console.log('y lap!')
+                if (laps == 1) {
+                    throw 'after scanning the entire field, no position available to insert next unit'
+                }
+                y = 0
+                laps += 1
+            }
+        }
+    }
 }
 
 /**
@@ -82,28 +102,14 @@ export function createUnit(units: Models.Node[], unitSize: number): Models.Node 
 * @param unitB a unit
 * @returns an instance of a unit
 */
-export function collides(unitA: Models.Node, unitB: Models.Node): boolean {
+export const collides = (unitA: Models.Node, unitB: Models.Node) => {
     if (!unitA || !unitB) {
         throw 'collides() expects two units to compare, received one or less'
     }
 
     const size = unitA.size
 
-    // Swaps units for fewer comparisons
-    if (unitA.x > unitB.x) {
-        const temp = unitA
-        unitA = unitB
-        unitB = unitA
-    }
-
-    if ((unitB.x > unitA.x && unitB.x < unitA.x + size) &&
-        ((unitB.y > unitA.y && unitB.y < unitA.y + size) || (
-            unitB.y < unitA.y && unitB.y + size > unitA.y
-        ))) {
-        return true
-    }
-
-    return false
+    return Math.abs(unitA.x - unitB.x) <= size && Math.abs(unitA.y - unitB.y) <= size
 }
 
 
@@ -116,7 +122,7 @@ export function collides(unitA: Models.Node, unitB: Models.Node): boolean {
 * @returns models.Node
 */
 export const genRandomNumber = (min: number, max: number) => {
-    return Math.floor(Math.random() * (max - min)) + min;
+    return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
 

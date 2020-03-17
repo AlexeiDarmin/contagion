@@ -10,15 +10,16 @@ class Canvas extends React.Component {
     state = {
         engine: new Engine.Engine(Constants.ENGINE_OPTIONS)
     }
-    
+
     constructor(props: any) {
         super(props)
 
         this.canvasRef = React.createRef<HTMLCanvasElement>();
     }
 
-    componentDidMount(){
+    componentDidMount() {
         this.engineInterval = setInterval(this.runAnimationFrame, 1000);
+        this.canvasRef.current?.getContext('2d')?.scale(Constants.FIELD_SCALE, Constants.FIELD_SCALE)
     }
 
     componentWillUnmount() {
@@ -30,7 +31,7 @@ class Canvas extends React.Component {
     runAnimationFrame = () => {
         const canvas = this.canvasRef.current
         if (!canvas) {
-            return 
+            return
             throw 'canvas should exist before executing runAnimationFrame()'
         }
 
@@ -41,8 +42,12 @@ class Canvas extends React.Component {
         return <canvas
             id="mainCanvas"
             ref={this.canvasRef}
-            width={Constants.FIELD_WIDTH}
-            height={Constants.FIELD_HEIGHT}
+            width={`${Constants.FIELD_WIDTH * Constants.FIELD_SCALE}px`}
+            height={`${Constants.FIELD_HEIGHT * Constants.FIELD_SCALE}px`}
+            style={{
+                width: `${Constants.FIELD_WIDTH}px`,
+                height: `${Constants.FIELD_HEIGHT}px`,
+            }}
             className="main-canvas">
 
         </canvas>
