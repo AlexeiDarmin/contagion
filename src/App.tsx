@@ -14,7 +14,7 @@ function App() {
         </div>
       </header>
       <div>
-        <COCanvas />
+        <COCanvas key='main' />
       </div>
     </div>
   );
