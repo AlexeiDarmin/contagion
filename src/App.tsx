@@ -1,24 +1,21 @@
 import React from 'react';
+
 import logo from './logo.svg';
+import COCanvas from './components/canvas'
 import './App.css';
 
 function App() {
   return (
     <div className="App">
       <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
+        Contagion
+        <div className="App-subheader">
+          A simulation of the effects our actions have on the spread of a virus.
+        </div>
       </header>
+      <div>
+        <COCanvas />
+      </div>
     </div>
   );
 }
