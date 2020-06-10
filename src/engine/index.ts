@@ -58,16 +58,26 @@ export const updateUnits = (units: Models.Node[]) => {
         if (!unitA) {
             continue
         }
-
+        // Multiple seperate collision detectors may cause issues...
+        checkWallCollision(unitA)
         let collided = false
         unitA.move()
+        if (unitA.collisionCooldown) {
+            nextUnits.push(unitA)
+            continue
+        }
         for (let i = 0; i < units.length; i++){
             const unitB = units[i]
             if (!unitB){
                 continue
             }
+            if (unitB.collisionCooldown) {
+                continue
+            }
             unitB.move()
+
             if (collides(unitA, unitB)) {
+                // applyCollisionRedirect(unitA, unitB)
                 unitA.vx *= -1
                 unitA.vy *= -1
                 unitB.vx *= -1
@@ -75,6 +85,14 @@ export const updateUnits = (units: Models.Node[]) => {
                 nextUnits.push(unitA)
                 nextUnits.push(unitB)
                 collided = true
+
+                // Generalize to a function
+                unitA.collisionCooldown = true
+                unitB.collisionCooldown = true
+                setTimeout(() => unitA.collisionCooldown = false, 100)
+                setTimeout(() => unitB.collisionCooldown = false, 100)
+
+                checkWallCollision(unitB)
                 delete units[i]
                 break
             } else {
@@ -88,6 +106,26 @@ export const updateUnits = (units: Models.Node[]) => {
     }
     
     return nextUnits
+}
+
+/**
+* Modifies a unit's direction vector if it has collided with a wall
+* @param unit a unit
+* @returns void
+*/
+export const checkWallCollision = (unit: Models.Node) => {
+    if (unit.x < 0){
+        unit.vx *= -1
+    }
+    if (unit.x + unit.size >= Constants.FIELD_WIDTH) {
+        unit.vx *= -1
+    }
+    if (unit.y < 0) {
+        unit.vy *= -1
+    }
+    if (unit.y + unit.size >= Constants.FIELD_HEIGHT) {
+        unit.vy *= -1
+    }
 }
 
 /**
@@ -158,11 +196,41 @@ export const collides = (unitA: Models.Node, unitB: Models.Node) => {
         throw 'collides() expects two units to compare, received one or less'
     }
 
-    const size = unitA.size + unitA.size
+    const size = unitA.size * 2 + 1
 
-    return Math.abs(unitA.x - unitB.x) <= size && Math.abs(unitA.y - unitB.y) <= size
+    return Math.abs(unitA.x - unitB.x) + Math.abs(unitA.y - unitB.y) <= size
 }
 
+/**
+* Updates the motion vector for two units that have collided
+* @param unitA a unit
+* @param unitB a unit
+* @returns void
+*/
+export const applyCollisionRedirect = (unitA: Models.Node, unitB: Models.Node) => {
+    if (!unitA || !unitB) {
+        throw 'applyCollisionRedirect() expects two units to compare, received one or less'
+    }
+
+    const newAVector = {
+        vx: unitA.vx + unitB.vx / 4,
+        vy: unitA.vy + unitB.vy / 4
+    }
+    const newBVector = {
+        vx: unitB.vx + unitA.vx / 4,
+        vy: unitB.vy + unitA.vy / 4
+    }
+
+    // normalize vectors to sum to one
+    const s1 = newAVector.vx + newAVector.vy
+    const s2 = newBVector.vx + newBVector.vy
+
+    unitA.vx = newAVector.vx / s1
+    unitA.vy = newAVector.vy / s1
+    unitB.vx = newBVector.vx / s2
+    unitB.vy = newBVector.vy / s2
+
+}
 
 
 
@@ -179,8 +247,9 @@ export const genRandomNumber = (min: number, max: number) => {
 
 /**
  * Problems to solve:
-    1 - generate sudo-random starting positions for objects effectively
-    2 - make it impossible for simulation to crash (limit object creation)
-    3 - find collisions efficiently
-    4 - calculate new travel vectors
+    (done) 1 - generate sudo-random starting positions for objects effectively
+    (ish)  2 - make it impossible for simulation to crash (limit object creation)
+    (done) 3 - find collisions efficiently
+    (wip)  4 - calculate new travel vectors
+    (done) 5 - redirect on collision with map boundaries
  * **/

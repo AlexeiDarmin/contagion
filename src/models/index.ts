@@ -14,6 +14,7 @@ export class Node {
     vy = 0
     size = 5
     status = HealthStatus.Healthy
+    collisionCooldown = false
 
     constructor(x: number, y: number, size: number) {
         this.x = x
@@ -46,10 +47,10 @@ export interface Vector {
 * @returns a vector
 */
 export const genVector = () => {
-    const distX = genRandomNumber(0, 1)
+    const distX = Math.random()
     const distY = 1 - distX
-    const directionX = Math.round(genRandomNumber(-1, 1))
-    const directionY = Math.round(genRandomNumber(-1, 1))
+    const directionX = Math.round(genRandomNumber(0, 1)) == 1 ? 1 : -1
+    const directionY = Math.round(genRandomNumber(0, 1)) == 1 ? 1 : -1
 
     return {
         vx: distX * directionX,
