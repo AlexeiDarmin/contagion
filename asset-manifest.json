@@ -1,0 +1,22 @@
+{
+  "files": {
+    "main.css": "/contagion/static/css/main.f5cc6954.chunk.css",
+    "main.js": "/contagion/static/js/main.494b9dc3.chunk.js",
+    "main.js.map": "/contagion/static/js/main.494b9dc3.chunk.js.map",
+    "runtime-main.js": "/contagion/static/js/runtime-main.2a021b25.js",
+    "runtime-main.js.map": "/contagion/static/js/runtime-main.2a021b25.js.map",
+    "static/js/2.ce04563d.chunk.js": "/contagion/static/js/2.ce04563d.chunk.js",
+    "static/js/2.ce04563d.chunk.js.map": "/contagion/static/js/2.ce04563d.chunk.js.map",
+    "index.html": "/contagion/index.html",
+    "precache-manifest.28c5203221407473d99c2a22a05d4bbd.js": "/contagion/precache-manifest.28c5203221407473d99c2a22a05d4bbd.js",
+    "service-worker.js": "/contagion/service-worker.js",
+    "static/css/main.f5cc6954.chunk.css.map": "/contagion/static/css/main.f5cc6954.chunk.css.map",
+    "static/js/2.ce04563d.chunk.js.LICENSE.txt": "/contagion/static/js/2.ce04563d.chunk.js.LICENSE.txt"
+  },
+  "entrypoints": [
+    "static/js/runtime-main.2a021b25.js",
+    "static/js/2.ce04563d.chunk.js",
+    "static/css/main.f5cc6954.chunk.css",
+    "static/js/main.494b9dc3.chunk.js"
+  ]
+}
